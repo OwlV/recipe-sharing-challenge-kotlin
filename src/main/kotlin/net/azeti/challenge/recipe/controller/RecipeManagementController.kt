@@ -1,11 +1,14 @@
 package net.azeti.challenge.recipe.controller
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import jakarta.validation.Valid
 import net.azeti.challenge.recipe.exception.ErrorDetails
 import net.azeti.challenge.recipe.exception.InvalidInputException
@@ -35,7 +38,8 @@ class RecipeManagementController(
     private val mapper = RecipeModelMapper()
 
     @Operation(
-        summary = "Fetch recipe by id"
+        summary = "Fetch recipe by id. Requires authentication.",
+        security = [SecurityRequirement(name = "Authorized")]
     )
     @ApiResponses(
         ApiResponse(
@@ -78,7 +82,8 @@ class RecipeManagementController(
 
 
     @Operation(
-        summary = "Fetch all recipes created by particular user"
+        summary = "Fetch all recipes created by particular user. Requires authentication.",
+        security = [SecurityRequirement(name = "Authorized")]
     )
     @ApiResponses(
         ApiResponse(
@@ -117,7 +122,8 @@ class RecipeManagementController(
 
 
     @Operation(
-        summary = "Create new recipe with authorized user as an author"
+        summary = "Create new recipe with authorized user as an author. Requires authentication.",
+        security = [SecurityRequirement(name = "Authorized")]
     )
     @ApiResponses(
         ApiResponse(
@@ -164,7 +170,8 @@ class RecipeManagementController(
 
 
     @Operation(
-        summary = "Update attributes of recipe with given id"
+        summary = "Update attributes of recipe with given id. Requires authentication.",
+        security = [SecurityRequirement(name = "Authorized")]
     )
     @ApiResponses(
         ApiResponse(
@@ -220,7 +227,8 @@ class RecipeManagementController(
 
 
     @Operation(
-        summary = "Delete the recipe with given id"
+        summary = "Delete the recipe with given id. Requires authentication.",
+        security = [SecurityRequirement(name = "Authorized")]
     )
     @ApiResponses(
         ApiResponse(

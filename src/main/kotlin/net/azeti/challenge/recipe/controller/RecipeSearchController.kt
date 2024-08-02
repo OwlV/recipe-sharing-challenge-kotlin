@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import net.azeti.challenge.recipe.exception.ErrorDetails
 import net.azeti.challenge.recipe.recipe.RecipeRecommendation
 import net.azeti.challenge.recipe.recipe.RecipeSearch
@@ -29,7 +30,8 @@ class RecipeSearchController(
     private val mapper = RecipeModelMapper()
 
     @Operation(
-        summary = "Search recipes by partial or full title match"
+        summary = "Search recipes by partial or full title match. Requires authentication.",
+        security = [SecurityRequirement(name = "Authorized")]
     )
     @ApiResponses(
         ApiResponse(
@@ -71,7 +73,8 @@ class RecipeSearchController(
     }
 
     @Operation(
-        summary = "Search recipes by partial or full username (author) match"
+        summary = "Search recipes by partial or full username (author) match. Requires authentication.",
+        security = [SecurityRequirement(name = "Authorized")]
     )
     @ApiResponses(
         ApiResponse(
@@ -115,7 +118,8 @@ class RecipeSearchController(
 
     @Operation(
         summary = "Get recommended recipe depending on current weather in Berlin. " +
-                "Avoids baking when it's too hot and frozen ingredients when it's too cold"
+                "Avoids baking when it's too hot and frozen ingredients when it's too cold. Requires authentication.",
+        security = [SecurityRequirement(name = "Authorized")]
     )
     @ApiResponses(
         ApiResponse(

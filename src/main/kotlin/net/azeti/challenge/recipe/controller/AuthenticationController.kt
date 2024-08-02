@@ -30,7 +30,7 @@ class AuthenticationController(
     @Autowired val authService: UserManagement
 ) {
 
-    @Operation(summary = "Create user account")
+    @Operation(summary = "Create user account. Authentication not required")
     @ApiResponses(
         ApiResponse(
             responseCode = "200",
@@ -68,14 +68,14 @@ class AuthenticationController(
     }
 
 
-    @Operation(summary = "Login in existing user account")
+    @Operation(summary = "Login in existing user account. Authentication not required.")
     @ApiResponses(
         ApiResponse(
             responseCode = "200",
             description = "User was successfully created",
             content = [Content(
                 mediaType = APPLICATION_JSON_VALUE,
-                schema = Schema(implementation = RegistrationResult::class)
+                schema = Schema(implementation = Token::class, description = "Access token for accessing secured endpoints")
             )]
         ),
         ApiResponse(

@@ -129,4 +129,266 @@ Write unit tests for the implemented functionality to ensure proper operation an
 
 * Focus on implementing the backend functionality only. No need to spend time on frontend/UI development for this challenge.
 * Read the `ABOUT.md` for more details about this source code.
- 
+
+
+### API Description ### 
+## Recipe Management API Documentation ##
+
+This documentation provides detailed information about the Recipe Management API endpoints. Note that all endpoints, except for signup and login, require a valid JWT token for access.
+Token should be provided in HttpHeader with name "Authorization" and value "Bearer: _token value_"
+
+## Base URL
+`http://localhost:8080`
+
+## Authentication
+
+### Signup
+**Endpoint:** `/auth/signup`
+
+**Method:** `POST`
+
+**Description:** Create a user account.
+
+**Request Body:**
+```json
+{
+  "username": "string", - not blank unique value
+  "password": "string", - not blank 
+  "email": "string" - not blank unique value
+}
+```
+**Responses:**
+
+* 200 OK: User was successfully created.
+* 400 Bad Request: Invalid input parameters.
+* 500 Internal Server Error: Internal server error.
+
+### Login
+**Endpoint:** /auth/login
+
+**Method:** `POST`
+
+**Description:** Log in to an existing user account.
+
+**Request Body:**
+```json
+{
+  "username": "string", - not blank string value
+  "password": "string" - not blank string value
+}
+```
+**Responses:**
+
+* 200 OK: User was successfully authenticated.
+* 400 Bad Request: Invalid input parameters.
+* 401 Unauthorized: Invalid username or password.
+* 500 Internal Server Error: Internal server error.
+
+## Recipe Management
+
+### Fetch Recipe by ID
+**Endpoint:** /api/recipe/{id}
+
+**Method:** GET
+
+**Description:** Fetch a recipe by its ID.
+
+**Parameters:** 
+
+id (path, required): The ID of the recipe to fetch.
+**Responses:**
+
+* 200 OK: Recipe found.
+* 404 Not Found: Matched recipes not found.
+* 401 Unauthorized: User is not authorized.
+* 500 Internal Server Error: Internal server error.
+Update Recipe
+**Endpoint:** /api/recipe/{id}
+
+**Method:** PUT
+
+**Description:** Update attributes of a recipe with the given ID.
+
+**Parameters:** 
+
+* id (path, required): The ID of the recipe to update.
+* Request Body:
+
+```json
+{
+  "title": "string", - not blank
+  "description": "string", - not blank
+  "ingredients": "string", - comma separeted string of "amount(double) unit(g|kg|ml|l|pc|tsp|tbsp|pinch) type(string)"
+  "instructions": "string", - not blank
+  "serving": "integer" - can be omitted, should be positibe when exists
+}
+```
+**Responses:**
+
+* 200 OK: Recipe updated.
+* 400 Bad Request: Invalid client request.
+* 401 Unauthorized: User is not authorized.
+* 403 Forbidden: Authorized user is not the author of the recipe.
+* 500 Internal Server Error: Internal server error.
+
+### Delete Recipe
+**Endpoint:** /api/recipe/{id}
+
+**Method:** DELETE
+
+**Description:** Delete the recipe with the given ID.
+
+**Parameters:** 
+
+* id (path, required): The ID of the recipe to delete.
+
+**Responses:**
+
+* 200 OK: Recipe deleted.
+* 400 Bad Request: Invalid client request.
+* 401 Unauthorized: User is not authorized.
+* 403 Forbidden: Authorized user is not the author of the recipe.
+* 500 Internal Server Error: Internal server error.
+
+### Create Recipe
+**Endpoint:** /api/recipe/
+
+**Method:** POST
+
+**Description:** Create a new recipe with the authorized user as the author.
+
+* Request Body:
+
+```json
+{
+   "title": "string", - not blank
+   "description": "string", - not blank
+   "ingredients": "string", - comma separeted string of "amount(double) unit(g|kg|ml|l|pc|tsp|tbsp|pinch) type(string)"
+   "instructions": "string", - not blank
+   "serving": "integer" - can be omitted, should be positibe when exists
+}
+```
+**Responses:**
+
+* 200 OK: Recipe created.
+* 400 Bad Request: Invalid client request.
+* 401 Unauthorized: User is not authorized.
+* 500 Internal Server Error: Internal server error.
+
+## Recipe Search
+
+### Get Recommended Recipe
+
+**Endpoint:** /api/recipe/search/recommended
+
+**Method:** GET
+
+**Description:** Get a recommended recipe depending on the current weather in Berlin. Avoids baking when it's too hot and frozen ingredients when it's too cold.
+
+**Responses:**
+
+* 200 OK: Recommended recipe found.
+* 404 Not Found: Matched recipes not found.
+* 401 Unauthorized: User is not authorized.
+* 500 Internal Server Error: Internal server error.
+### Search Recipes by Title
+**Endpoint:** /api/recipe/search/byTitle
+
+**Method:** GET
+
+**Description:** Search recipes by partial or full title match.
+
+**Parameters:** 
+
+* title (query, required): The title or part of the title to search for.
+
+**Responses:**
+
+* 200 OK: Recipes found.
+* 404 Not Found: Matched recipes not found.
+* 401 Unauthorized: User is not authorized.
+* 500 Internal Server Error: Internal server error.
+### Search Recipes by Author
+**Endpoint:** /api/recipe/search/byAuthor
+
+**Method:** GET
+
+**Description:** Search recipes by partial or full username (author) match.
+
+**Parameters:** 
+
+* author (query, required): The username or part of the username to search for.
+
+**Responses:**
+
+
+* 200 OK: Recipes found.
+* 404 Not Found: Matched recipes not found.
+* 401 Unauthorized: User is not authorized.
+* 500 Internal Server Error: Internal server error.
+Fetch All Recipes by User
+**Endpoint:** /api/recipe/byUserName
+
+**Method:** GET
+
+**Description:** Fetch all recipes created by a particular user.
+
+**Parameters:** 
+
+* username (query, required): The username of the user whose recipes to fetch.
+
+**Responses:**
+
+* 200 OK: Recipes found.
+* 404 Not Found: Matched recipes not found.
+* 401 Unauthorized: User is not authorized.
+* 500 Internal Server Error: Internal server error.
+Components
+
+## Schemas
+### RecipeDto
+
+```json
+{
+   "id" : "integer"
+   "title": "string", - not blank
+   "description": "string", - not blank
+   "ingredients": "string", - comma separeted string of "amount(double) unit(g|kg|ml|l|pc|tsp|tbsp|pinch) type(string)"
+   "instructions": "string", - not blank
+   "serving": "integer" - can be omitted, should be positibe when exists
+}
+```
+### ErrorDetails
+
+```json
+{
+  "errorMessage": "string",
+  "errorTimestamp": "string"
+}
+```
+### Registration
+
+```json
+{
+  "username": "string",
+  "password": "string",
+  "email": "string"
+}
+```
+### RegistrationResult
+
+```json
+{
+  "username": "string",
+  "email": "string",
+  "details": "string"
+}
+```
+### Login
+
+```json
+{
+  "username": "string",
+  "password": "string"
+}
+``` 

@@ -1,7 +1,8 @@
-package net.azeti.challenge.recipe.recipe
+package net.azeti.challenge.recipe.recipe.service
 
 import net.azeti.challenge.recipe.exception.NoSuchRecipeException
-import net.azeti.challenge.recipe.recipe.model.Ingredient
+import net.azeti.challenge.recipe.recipe.RecipeRecommendation
+import net.azeti.challenge.recipe.recipe.RecipeRepository
 import net.azeti.challenge.recipe.recipe.model.Recipe
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -15,15 +16,24 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 
-@Service
 class RecipeRecommendationService(
+    private val restTemplate: RestTemplate,
     private val recipeRepository: RecipeRepository,
     private val weatherServiceUrlTemplate: String,
     private val noBakingTemp: Int,
     private val noFrozenTemp: Int
 ) : RecipeRecommendation {
     override fun getRecommendedRecipe(): Recipe {
-        val currentTemperature = fetchCurrentTemp()
+        val currentTemperature = try {
+            fetchCurrentTemp()
+        } catch (e: WeatherServiceUnavailableException) {
+            logger.warn("Weather service is unavailable. Defaulting to all recipes.", e)
+            null // Fallback to default behavior
+        } catch (e: WeatherServiceException) {
+            logger.error("Error fetching current temperature. Defaulting to all recipes.", e)
+            null // Fallback to default behavior
+        }
+
         val recommended = when {
             currentTemperature == null -> recipeRepository.findAll()
             currentTemperature > noBakingTemp -> recipeRepository.findByInstructionsNotContainingIgnoreCase("bake")
@@ -40,7 +50,7 @@ class RecipeRecommendationService(
 
     private fun fetchCurrentTemp(): Double? {
         return try {
-            return RestTemplate().getForEntity(
+            return restTemplate.getForEntity(
                 weatherServiceUrlTemplate,
                 WeatherApiResponse::class.java,
                 mapOf("date-time" to getCurrentDateTime())
@@ -65,7 +75,8 @@ class RecipeRecommendationService(
     }
 
     companion object {
-        @JvmStatic val logger = LoggerFactory.getLogger(RecipeRecommendation::class.java)
+        @JvmStatic
+        val logger = LoggerFactory.getLogger(RecipeRecommendation::class.java)
     }
 }
 
@@ -76,4 +87,5 @@ data class WeatherApiResponse(val currentConditions: List<CurrentConditions>) : 
 }
 
 open class WeatherServiceException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
-class WeatherServiceUnavailableException(message: String, cause: Throwable? = null) : WeatherServiceException(message, cause)
+class WeatherServiceUnavailableException(message: String, cause: Throwable? = null) :
+    WeatherServiceException(message, cause)

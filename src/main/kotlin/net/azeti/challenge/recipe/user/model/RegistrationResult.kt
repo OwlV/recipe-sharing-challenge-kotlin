@@ -1,3 +1,3 @@
-package net.azeti.challenge.recipe.user
+package net.azeti.challenge.recipe.user.model
 
-class RegistrationResult(val username: String?, val email: String?)
+class RegistrationResult(val username: String?, val email: String?, val details: String? = null)

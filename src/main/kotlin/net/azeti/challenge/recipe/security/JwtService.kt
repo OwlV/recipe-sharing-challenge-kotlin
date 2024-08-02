@@ -1,77 +1,79 @@
 package net.azeti.challenge.recipe.security
 
-import com.sun.org.apache.xml.internal.security.algorithms.SignatureAlgorithm
+
+import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.impl.DefaultJwtParserBuilder
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
-import jakarta.servlet.http.Cookie
-import jakarta.servlet.http.HttpServletRequest
+import net.azeti.challenge.recipe.config.properties.JwtConfigurationProperties
 import org.slf4j.LoggerFactory
-import org.springframework.http.ResponseCookie
-import org.springframework.web.util.WebUtils
-import java.security.Key
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.stereotype.Service
+import java.util.*
+import javax.crypto.SecretKey
 
+@Service
+class JwtService(@Autowired jwtConfigurationProperties: JwtConfigurationProperties) {
+    private val securityKey: String = jwtConfigurationProperties.securityKey
+    private val expirationTime: Long = jwtConfigurationProperties.expirationTime
 
-class JwtUtils(val jwtSecret: String, val jwtExpirationMs: Int, val jwtCookie: String) {
-
-
-    fun getJwtFromCookies(request: HttpServletRequest?): String? {
-        val cookie: Cookie? = WebUtils.getCookie(request!!, jwtCookie)
-        return if (cookie != null) {
-            cookie.getValue()
-        } else {
-            null
-        }
+    fun extractUsername(token: String?): String? {
+        return extractClaim(token) { obj: Claims -> obj.subject }
     }
 
-    fun generateJwtCookie(userPrincipal: UserDetailsImpl): ResponseCookie {
-        val jwt = generateTokenFromUsername(userPrincipal.getUsername())
-        val cookie =
-            ResponseCookie.from(jwtCookie, jwt).path("/api").maxAge((24 * 60 * 60).toLong()).httpOnly(true).build()
-        return cookie
+    fun <T> extractClaim(token: String?, claimsResolver: (Claims) -> T): T {
+        val claims = extractAllClaims(token)
+        return claimsResolver.invoke(claims)
     }
 
-    fun getCleanJwtCookie(): ResponseCookie {
-        val cookie = ResponseCookie.from(jwtCookie, null).path("/api").build()
-        return cookie
+    fun generateToken(userDetails: UserDetails): String {
+        return generateToken(HashMap(), userDetails)
     }
 
-    fun getUserNameFromJwtToken(token: String?): String {
-        return Jwts.builder().setSigningKey(key()).build()
-            .parseClaimsJws(token).getBody().getSubject()
+    fun generateToken(extraClaims: Map<String?, Any?>, userDetails: UserDetails): String {
+        return buildToken(extraClaims, userDetails, expirationTime)
     }
 
-    private fun key(): Key {
-        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret))
+    fun extractExpiration(token: String?): Date {
+        return extractClaim(token) { obj: Claims -> obj.expiration }
     }
-
-    fun validateJwtToken(authToken: String?): Boolean {
-        try {
-            Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken)
-            return true
-        } catch (e: MalformedJwtException) {
-            logger.error("Invalid JWT token: {}", e.getMessage())
-        } catch (e: ExpiredJwtException) {
-            logger.error("JWT token is expired: {}", e.getMessage())
-        } catch (e: UnsupportedJwtException) {
-            logger.error("JWT token is unsupported: {}", e.getMessage())
-        } catch (e: IllegalArgumentException) {
-            logger.error("JWT claims string is empty: {}", e.message)
-        }
-
-        return false
-    }
-
-    fun generateTokenFromUsername(username: String?): String {
-        return Jwts.builder()
-            .setSubject(username)
-            .setIssuedAt(Date())
-            .setExpiration(Date(Date().getTime() + jwtExpirationMs))
-            .signWith(key(), SignatureAlgorithm.HS256)
+    private fun buildToken(
+        extraClaims: Map<String?, Any?>,
+        userDetails: UserDetails,
+        expiration: Long
+    ): String {
+        return Jwts
+            .builder()
+            .claims(extraClaims)
+            .subject(userDetails.username)
+            .issuedAt(Date(System.currentTimeMillis()))
+            .expiration(Date(System.currentTimeMillis() + expiration))
+            .signWith(getSignInKey())
             .compact()
     }
 
-    companion object {
-        @JvmStatic val logger = LoggerFactory.getLogger(JwtUtils::class.java)
+    fun isTokenValid(token: String?, userDetails: UserDetails): Boolean {
+        val username = extractUsername(token)
+        return (username == userDetails.username) && !isTokenExpired(token)
+    }
+
+    private fun isTokenExpired(token: String?): Boolean {
+        return extractExpiration(token).before(Date())
+    }
+
+
+    private fun extractAllClaims(token: String?): Claims {
+        return DefaultJwtParserBuilder()
+            .verifyWith(getSignInKey())
+            .build()
+            .parseSignedClaims(token)
+            .payload
+    }
+
+    private fun getSignInKey(): SecretKey {
+        val keyBytes = Decoders.BASE64.decode(securityKey)
+        return Keys.hmacShaKeyFor(keyBytes)
     }
 }

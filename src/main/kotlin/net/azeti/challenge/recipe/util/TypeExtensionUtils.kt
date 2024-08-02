@@ -1,4 +1,3 @@
 package net.azeti.challenge.recipe.util
 
-class TypeExtensionUtils {
-}
+typealias ApiRequestBody = io.swagger.v3.oas.annotations.parameters.RequestBody

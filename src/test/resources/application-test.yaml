@@ -10,10 +10,6 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     defer-datasource-initialization: true
-  sql:
-    init:
-      data-locations: classpath:database-init.sql
-
 
 recommendations-service:
   http:
@@ -25,5 +21,5 @@ recommendations-service:
 
 #Security
 security.jwt:
-  security-key: a+TTl9aXGTzUzIPhmBt/eprBR7L3IOWpeElCEOlVtA8=
-  expiration-time: 86400000
+  security-key: 5VeX5L/4XylptRvL2SAhnu1MNwgbq+O+Yeqeslfz0nw70cGoULRAy+oS3R4f6L2I0v43u+2DLv6mXe9iRB1EpQ==
+  expiration-time: 864000

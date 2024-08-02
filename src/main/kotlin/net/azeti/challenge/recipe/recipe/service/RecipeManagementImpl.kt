@@ -1,20 +1,25 @@
-package net.azeti.challenge.recipe.recipe
+package net.azeti.challenge.recipe.recipe.service
 
+import net.azeti.challenge.recipe.exception.RecipeAlreadyExistsException
+import net.azeti.challenge.recipe.recipe.RecipeManagement
+import net.azeti.challenge.recipe.recipe.RecipeRepository
 import net.azeti.challenge.recipe.recipe.model.Recipe
-import net.azeti.challenge.recipe.user.User
+import net.azeti.challenge.recipe.user.model.User
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.InsufficientAuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Optional
 
 
 @Service
 class RecipeManagementImpl(@Autowired val recipeRepository: RecipeRepository) : RecipeManagement {
 
-
     override fun create(recipe: Recipe): Recipe {
+        if (recipe.id != null && recipeRepository.existsById(recipe.id)) {
+            throw RecipeAlreadyExistsException("Recipe with id ${recipe.id} already exists")
+        }
         val authentication = SecurityContextHolder.getContext().authentication
         if (authentication.isAuthenticated) {
             when (authentication.principal) {

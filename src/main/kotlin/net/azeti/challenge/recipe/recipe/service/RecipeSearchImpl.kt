@@ -1,5 +1,7 @@
-package net.azeti.challenge.recipe.recipe
+package net.azeti.challenge.recipe.recipe.service
 
+import net.azeti.challenge.recipe.recipe.RecipeRepository
+import net.azeti.challenge.recipe.recipe.RecipeSearch
 import net.azeti.challenge.recipe.recipe.model.Recipe
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service

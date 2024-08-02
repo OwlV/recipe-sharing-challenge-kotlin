@@ -1,6 +1,13 @@
-package net.azeti.challenge.recipe.user
+package net.azeti.challenge.recipe.user.service
 
 import net.azeti.challenge.recipe.security.JwtService
+import net.azeti.challenge.recipe.user.UserManagement
+import net.azeti.challenge.recipe.user.UserRepository
+import net.azeti.challenge.recipe.user.model.Login
+import net.azeti.challenge.recipe.user.model.Registration
+import net.azeti.challenge.recipe.user.model.RegistrationResult
+import net.azeti.challenge.recipe.user.model.Token
+import net.azeti.challenge.recipe.user.model.User
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
@@ -25,17 +32,17 @@ class UserManagementImpl(
                     password = passwordEncoder.encode(registration.password)
                 )
             )
-        return RegistrationResult(user.username, user.email)
+        return RegistrationResult(user.username, user.email, "Successfully registered")
     }
 
-    override fun login(login: Login): Optional<Token> {
+    override fun login(login: Login): Token {
         authenticationManager.authenticate(UsernamePasswordAuthenticationToken(login.username, login.password) )
         val user = userRepository.findByUsername(login.username!!)
             .orElseThrow {
-                BadCredentialsException( "Invalid email or password" )
+                BadCredentialsException("Invalid email or password")
             }
         val jwt = jwtService.generateToken(user)
-        return Optional.of(Token(jwt, jwtService.extractExpiration(jwt)))
+        return Token(jwt, jwtService.extractExpiration(jwt))
     }
 
 }

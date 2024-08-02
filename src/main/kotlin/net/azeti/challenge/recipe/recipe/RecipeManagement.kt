@@ -1,6 +1,7 @@
 package net.azeti.challenge.recipe.recipe
 
-import java.util.Optional
+import net.azeti.challenge.recipe.recipe.model.Recipe
+import java.util.*
 
 // This class assumes the Recipe's id is a Long, this can be changed if needed.
 interface RecipeManagement {
@@ -11,7 +12,7 @@ interface RecipeManagement {
 
     fun update(id: Long, recipe: Recipe): Recipe
 
-    fun delete(id: Long): Recipe
+    fun delete(id: Long): Recipe?
 
     fun getByUser(username: String): List<Recipe>
 }

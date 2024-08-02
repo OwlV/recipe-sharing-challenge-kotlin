@@ -1,4 +1,4 @@
-package net.azeti.challenge.recipe.user
+package net.azeti.challenge.recipe.user.model
 
 import jakarta.persistence.*
 import jakarta.validation.constraints.Email
@@ -18,9 +18,9 @@ import java.util.*
 )
 class User(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Long? = null,
-    @NotBlank @Size(max = 20) private val username: String? = null,
-    @NotBlank @Size(max = 50) @Email val email: String? = null,
-    @NotBlank @Size(max = 120) private val password: String? = null
+    @field:NotBlank @Size(max = 20) private val username: String? = null,
+    @field:NotBlank @Size(max = 50) @Email val email: String? = null,
+    @field:NotBlank @Size(max = 120) private val password: String? = null
 ) : UserDetails {
 
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> = Collections.emptySet()

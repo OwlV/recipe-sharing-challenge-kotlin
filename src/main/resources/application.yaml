@@ -1,0 +1,28 @@
+spring.jpa.open-in-view: false
+springdoc:
+  api-docs.path: /api-docs
+  swagger-ui.tryItOutEnabled: false
+spring:
+  datasource:
+    url: jdbc:h2:mem:mydb
+    username: sa
+    password: password
+    driverClassName: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+
+
+
+recommendations-service:
+  http:
+    api-key: X3W9MQN8AHGVQ9W3JWZNNAAXQ
+    uri: https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/Berlin/{date-time}?unitGroup=metric&include=current&elements=temp&key=${recommendations-service.http.api-key}&contentType=json
+  constraints:
+    no-baking-temp: 28
+    no-frozen-temp: 2
+
+#Security
+security.jwt:
+  security-key: a+TTl9aXGTzUzIPhmBt/eprBR7L3IOWpeElCEOlVtA8=
+  expiration-time: 86400000

@@ -7,7 +7,9 @@ class NoSuchRecipeException(message: String? = null) :
 
 class RecipeValidationException(message: String) : RecipeManagementException(message)
 
-class NoRecipesCreated(message: String) : RecipeManagementException(message)
 
 class InvalidInputException(message: String) : RecipeManagementException(message)
+class RecipeAlreadyExistsException(message: String) : RecipeManagementException(message)
+
+
 
